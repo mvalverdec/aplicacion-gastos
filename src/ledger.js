@@ -32,4 +32,8 @@ function undoLastBatch() {
   return { removed: ledger.length - filtered.length, batchId };
 }
 
-module.exports = { readLedger, appendBatch, undoLastBatch };
+function getAppliedFiles() {
+  return new Set(readLedger().map(e => e.source.file));
+}
+
+module.exports = { readLedger, appendBatch, undoLastBatch, getAppliedFiles };

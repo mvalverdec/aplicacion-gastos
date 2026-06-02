@@ -22,11 +22,10 @@ function sourceType(mimeType) {
 }
 
 function buildPrompt() {
-  const today = new Date().toISOString().slice(0, 10);
   return `You are an expense extraction engine. Extract ALL expense line items from the provided document.
 
 Return a JSON array of objects. Each object MUST have exactly these fields:
-  date        – string "YYYY-MM-DD". If ambiguous or missing, use today ${today} and add "fecha ambigua" to warnings.
+  date        – string "YYYY-MM-DD", or null if the date is missing or ambiguous. If null, add "sin fecha" to warnings.
   amount      – number (float). Normalize European decimals: "1.234,56" → 1234.56, "12,50" → 12.50. If unreadable, use 0 and add "importe ilegible" to warnings.
   currency    – ISO-4217 string. Default "EUR" if not stated.
   description – string. If vague or multiple interpretations, add "descripción ambigua" to warnings.
@@ -50,7 +49,7 @@ async function parseExpenses(filePath) {
   const mimeType = MIME_MAP[ext];
   const prompt = buildPrompt();
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: MODEL });
+  const model = genAI.getGenerativeModel({ model: MODEL, generationConfig: { temperature: 0 } });
 
   let parts;
   if (mimeType === null) {
