@@ -1,19 +1,33 @@
 'use strict';
 
 const db = require('../db/connection');
+const currencyService = require('../services/currency.service');
 
-function mapExpense(row) {
+function formatDate(value) {
+  if (!value) return null;
+  if (typeof value === 'string') return value.slice(0, 10);
+  return value.toISOString().slice(0, 10);
+}
+
+function mapExpense(row, exchangeRate = null) {
   if (!row) return null;
+  const converted = exchangeRate
+    ? currencyService.convertAmount(row.amount, row.currency, exchangeRate)
+    : { amountCrc: null, amountUsd: null, conversionStatus: 'not_requested' };
+
   return {
     id: Number(row.id),
     importId: row.import_id ? Number(row.import_id) : null,
     categoryId: row.category_id ? Number(row.category_id) : null,
     categoryName: row.category_name || null,
-    date: row.expense_date,
+    date: formatDate(row.expense_date),
     merchant: row.merchant,
     description: row.description,
     amount: Number(row.amount),
     currency: row.currency,
+    amountCrc: converted.amountCrc,
+    amountUsd: converted.amountUsd,
+    conversionStatus: converted.conversionStatus,
     paymentMethod: row.payment_method,
     documentNumber: row.document_number,
     confidence: row.confidence === null ? null : Number(row.confidence),
@@ -59,7 +73,7 @@ async function createMany(expenses) {
   return created;
 }
 
-async function listExpenses(filters = {}) {
+async function listExpenses(filters = {}, exchangeRate = null) {
   const where = [];
   const params = [];
 
@@ -93,51 +107,58 @@ async function listExpenses(filters = {}) {
     limit 500
   `, params);
 
-  return result.rows.map(mapExpense);
+  return result.rows.map(row => mapExpense(row, exchangeRate));
 }
 
-async function getExpense(id) {
+async function getExpense(id, exchangeRate = null) {
   const result = await db.query(`
     select e.*, c.name as category_name
     from expenses e
     left join categories c on c.id = e.category_id
     where e.id = $1
   `, [id]);
-  return mapExpense(result.rows[0]);
+  return mapExpense(result.rows[0], exchangeRate);
 }
 
 async function updateExpense(id, expense) {
+  const fields = {
+    categoryId: 'category_id',
+    date: 'expense_date',
+    merchant: 'merchant',
+    description: 'description',
+    amount: 'amount',
+    currency: 'currency',
+    paymentMethod: 'payment_method',
+    documentNumber: 'document_number',
+    confidence: 'confidence',
+    needsReview: 'needs_review',
+    notes: 'notes',
+  };
+
+  const assignments = [];
+  const params = [id];
+
+  for (const [key, column] of Object.entries(fields)) {
+    if (Object.prototype.hasOwnProperty.call(expense, key)) {
+      params.push(expense[key]);
+      assignments.push(`${column} = $${params.length}`);
+    }
+  }
+
+  if (assignments.length === 0) {
+    return getExpense(id);
+  }
+
   const result = await db.query(`
     update expenses
-    set category_id = coalesce($2, category_id),
-        expense_date = coalesce($3, expense_date),
-        merchant = coalesce($4, merchant),
-        description = coalesce($5, description),
-        amount = coalesce($6, amount),
-        currency = coalesce($7, currency),
-        payment_method = coalesce($8, payment_method),
-        document_number = coalesce($9, document_number),
-        confidence = coalesce($10, confidence),
-        needs_review = coalesce($11, needs_review),
-        notes = coalesce($12, notes),
+    set ${assignments.join(', ')},
         updated_at = now()
     where id = $1
-    returning *
-  `, [
-    id,
-    expense.categoryId,
-    expense.date,
-    expense.merchant,
-    expense.description,
-    expense.amount,
-    expense.currency,
-    expense.paymentMethod,
-    expense.documentNumber,
-    expense.confidence,
-    expense.needsReview,
-    expense.notes,
-  ]);
-  return mapExpense(result.rows[0]);
+    returning id
+  `, params);
+
+  if (result.rowCount === 0) return null;
+  return getExpense(id);
 }
 
 async function deleteExpense(id) {

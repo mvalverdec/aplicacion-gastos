@@ -9,7 +9,10 @@ const controller = require('../controllers/imports.controller');
 const router = express.Router();
 const upload = multer({ dest: path.join(os.tmpdir(), 'aplicacion-gastos-uploads') });
 
-router.post('/imports', upload.single('file'), controller.createImport);
+router.post('/imports', upload.fields([
+  { name: 'file', maxCount: 1 },
+  { name: 'files', maxCount: 20 },
+]), controller.createImport);
 router.get('/imports', controller.listImports);
 router.get('/imports/:id', controller.getImport);
 router.delete('/imports/:id', controller.deleteImport);

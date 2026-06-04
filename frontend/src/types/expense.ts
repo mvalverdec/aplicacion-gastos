@@ -8,6 +8,9 @@ export type Expense = {
   description: string;
   amount: number;
   currency: string;
+  amountCrc: number | null;
+  amountUsd: number | null;
+  conversionStatus: string;
   paymentMethod: string | null;
   documentNumber: string | null;
   confidence: number | null;

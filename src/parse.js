@@ -27,7 +27,7 @@ function buildPrompt() {
 Return a JSON array of objects. Each object MUST have exactly these fields:
   date        – string "YYYY-MM-DD", or null if the date is missing or ambiguous. If null, add "sin fecha" to warnings.
   amount      – number (float). Normalize European decimals: "1.234,56" → 1234.56, "12,50" → 12.50. If unreadable, use 0 and add "importe ilegible" to warnings.
-  currency    – ISO-4217 string. Default "EUR" if not stated.
+  currency    – ISO-4217 string. Use "CRC" for colones/₡, "USD" for dollars/$, "EUR" for euros/€. Default "CRC" if not stated.
   description – string. If vague or multiple interpretations, add "descripción ambigua" to warnings.
   category    – one of: "alimentación","transporte","alojamiento","material","servicios","otros". Null if undeterminable; add "sin categoría" to warnings.
   status      – "needs_review" if warnings is non-empty, otherwise "ok".

@@ -4,8 +4,9 @@ import type { Dashboard } from './types/dashboard';
 import ImportPage from './pages/ImportPage';
 import DashboardPage from './pages/DashboardPage';
 import ExpensesPage from './pages/ExpensesPage';
+import ReviewPage from './pages/ReviewPage';
 
-type View = 'import' | 'dashboard' | 'expenses';
+type View = 'import' | 'dashboard' | 'expenses' | 'review';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -31,9 +32,10 @@ export default function App() {
 
   const navItems = useMemo<Array<{ id: View; label: string }>>(
     () => [
-      { id: 'dashboard', label: 'Dashboard' },
-      { id: 'expenses', label: 'Gastos' },
       { id: 'import', label: 'Importar' },
+      { id: 'review', label: 'Revisión' },
+      { id: 'expenses', label: 'Gastos' },
+      { id: 'dashboard', label: 'Dashboard' },
     ],
     [],
   );
@@ -67,6 +69,7 @@ export default function App() {
       )}
 
       {view === 'dashboard' && <DashboardPage dashboard={dashboard} loading={loading} />}
+      {view === 'review' && <ReviewPage onChanged={refresh} />}
       {view === 'expenses' && <ExpensesPage expenses={dashboard?.recentExpenses ?? []} loading={loading} />}
       {view === 'import' && <ImportPage onImported={refresh} />}
     </main>

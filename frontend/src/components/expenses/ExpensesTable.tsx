@@ -1,4 +1,5 @@
 import type { Expense } from '../../types/expense';
+import { formatMoney } from '../../lib/formatters';
 
 type Props = {
   expenses: Expense[];
@@ -18,7 +19,9 @@ export default function ExpensesTable({ expenses }: Props) {
             <th>Comercio</th>
             <th>Descripción</th>
             <th>Categoría</th>
-            <th>Monto</th>
+            <th>Original</th>
+            <th>Colones</th>
+            <th>Dólares</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -30,10 +33,13 @@ export default function ExpensesTable({ expenses }: Props) {
               <td>{expense.description}</td>
               <td>{expense.categoryName ?? 'Sin categoría'}</td>
               <td className="amount">
-                {expense.amount.toLocaleString('es-CR', {
-                  style: 'currency',
-                  currency: expense.currency || 'EUR',
-                })}
+                {formatMoney(expense.amount, expense.currency || 'CRC')}
+              </td>
+              <td className="amount">
+                {formatMoney(expense.amountCrc, 'CRC')}
+              </td>
+              <td className="amount">
+                {formatMoney(expense.amountUsd, 'USD')}
               </td>
               <td>
                 <span className={expense.needsReview ? 'badge warn' : 'badge ok'}>

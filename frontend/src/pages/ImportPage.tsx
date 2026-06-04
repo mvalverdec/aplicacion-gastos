@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { importFile, importText } from '../services/api';
+import { importFiles, importText } from '../services/api';
 
 type Props = {
   onImported: () => Promise<void>;
@@ -7,7 +7,7 @@ type Props = {
 
 export default function ImportPage({ onImported }: Props) {
   const [text, setText] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -17,10 +17,10 @@ export default function ImportPage({ onImported }: Props) {
     setStatus(null);
 
     try {
-      const result = file ? await importFile(file) : await importText(text);
+      const result = files.length > 0 ? await importFiles(files) : await importText(text);
       setStatus(`${result.expenses.length} gasto(s) guardado(s).`);
       setText('');
-      setFile(null);
+      setFiles([]);
       await onImported();
     } catch (err) {
       setStatus(err instanceof Error ? err.message : 'No se pudo importar.');
@@ -38,13 +38,22 @@ export default function ImportPage({ onImported }: Props) {
 
       <form className="import-form" onSubmit={submit}>
         <label>
-          Archivo
+          Archivos
           <input
             type="file"
+            multiple
             accept=".pdf,.png,.jpg,.jpeg,.txt"
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+            onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
           />
         </label>
+
+        {files.length > 0 && (
+          <div className="file-list">
+            {files.map((selectedFile) => (
+              <span key={`${selectedFile.name}-${selectedFile.size}`}>{selectedFile.name}</span>
+            ))}
+          </div>
+        )}
 
         <label>
           Texto
@@ -53,12 +62,12 @@ export default function ImportPage({ onImported }: Props) {
             rows={8}
             placeholder="Pega aquí un recibo, factura o listado de gastos."
             onChange={(event) => setText(event.target.value)}
-            disabled={Boolean(file)}
+            disabled={files.length > 0}
           />
         </label>
 
         <div className="form-actions">
-          <button type="submit" disabled={busy || (!file && text.trim().length === 0)}>
+          <button type="submit" disabled={busy || (files.length === 0 && text.trim().length === 0)}>
             {busy ? 'Procesando...' : 'Procesar y guardar'}
           </button>
           {status && <span>{status}</span>}

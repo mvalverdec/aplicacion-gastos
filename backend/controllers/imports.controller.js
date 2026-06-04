@@ -5,8 +5,12 @@ const importsRepository = require('../repositories/imports.repository');
 
 async function createImport(req, res, next) {
   try {
+    const files = [
+      ...(req.files?.file || []),
+      ...(req.files?.files || []),
+    ];
     const result = await importsService.processImport({
-      file: req.file,
+      files,
       text: req.body.text,
       sourceName: req.body.sourceName,
     });

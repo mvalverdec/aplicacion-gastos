@@ -30,9 +30,14 @@ Requiere un archivo `.env` en la raíz del proyecto (no en control de versiones)
 ```
 GEMINI_API_KEY=your_key_here
 DATABASE_URL=postgres://localhost:5432/aplicacion_gastos
+BCCR_EMAIL=correo_suscrito_bccr
+BCCR_TOKEN=token_bccr
+BCCR_USD_SELL_RATE=463.66
+EUR_USD_RATE=1.163
 ```
 
 `DATABASE_URL` es opcional si se usa la base local por defecto `aplicacion_gastos`.
+`BCCR_EMAIL` y `BCCR_TOKEN` son opcionales, pero permiten consultar el web service del BCCR. `BCCR_USD_SELL_RATE` sirve como respaldo local para el tipo de cambio de venta USD/CRC. `EUR_USD_RATE` es necesario si se importan gastos en euros y se quieren mostrar en dólares/colones.
 
 ## API
 

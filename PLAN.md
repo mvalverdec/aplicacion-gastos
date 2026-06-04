@@ -40,6 +40,10 @@ Ya se implemento una primera vertical funcional:
 - Endpoints de gastos, categorias, health y dashboard.
 - Frontend React + TypeScript inicial en `frontend/`.
 - Pantallas iniciales: dashboard, tabla de gastos e importacion.
+- Pantalla de revision editable para gastos con `needsReview`.
+- Importacion de multiples archivos en una sola carga.
+- Soporte multimoneda para mostrar montos originales y equivalentes en CRC/USD.
+- Conversion USD/CRC con tipo de cambio de venta BCCR via web service, portada publica o respaldo por `.env`.
 - Build de frontend verificado.
 - Endpoints locales verificados contra PostgreSQL.
 
@@ -160,6 +164,10 @@ Config opcional en `.env`:
 DATABASE_URL=postgres://localhost:5432/aplicacion_gastos
 PORT=3000
 FRONTEND_ORIGIN=http://127.0.0.1:5173
+BCCR_EMAIL=correo_suscrito_bccr
+BCCR_TOKEN=token_bccr
+BCCR_USD_SELL_RATE=463.66
+EUR_USD_RATE=1.163
 ```
 
 Arranque:
@@ -218,31 +226,25 @@ Resultado:
    - Validar salida de Gemini antes de guardar.
    - Rechazar montos invalidos, fechas mal formadas y monedas no soportadas.
 
-3. Agregar pantalla de revision.
-   - Mostrar gastos con `needsReview`.
-   - Permitir corregir fecha, categoria, comercio y monto.
-   - Marcar gasto como revisado.
-
-4. Mejorar importacion.
+3. Mejorar importacion.
    - Mostrar progreso y errores por archivo.
-   - Soportar importacion multiple.
    - Evitar duplicados por archivo o hash.
 
-5. Mejorar dashboards.
+4. Mejorar dashboards.
    - Filtros por rango de fechas, categoria y comercio.
    - Graficos con una libreria dedicada si los graficos simples no alcanzan.
-   - Totales por moneda o conversion si aparecen varias monedas.
+   - Historial de tipos de cambio por fecha del gasto.
 
-6. Unificar CLI y web app.
+5. Unificar CLI y web app.
    - Hacer que la CLI pueda guardar en PostgreSQL.
    - Mantener `expenses.json` solo como modo legacy o de exportacion.
 
-7. Seguridad y configuracion.
+6. Seguridad y configuracion.
    - No devolver secretos en endpoints.
    - Mantener `.env` fuera de git.
    - Documentar instalacion de PostgreSQL segun Homebrew, Postgres.app o Docker.
 
-8. Experiencia de instalacion local.
+7. Experiencia de instalacion local.
    - Agregar README actualizado.
    - Agregar script `npm run dev` que arranque backend y frontend juntos si se decide agregar una dependencia como `concurrently`.
    - Agregar script de chequeo de PostgreSQL.
@@ -250,7 +252,6 @@ Resultado:
 ## Riesgos Pendientes
 
 - La salida de Gemini puede variar y romper el guardado si no se valida con un schema.
-- El frontend aun no edita gastos; solo lista e importa.
 - No hay autenticacion porque la app esta pensada local-first.
 - No hay tests reales todavia.
 - Si PostgreSQL esta apagado, el backend responde error; falta una pantalla dedicada con instrucciones.

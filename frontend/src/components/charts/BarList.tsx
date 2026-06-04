@@ -1,6 +1,7 @@
 type BarItem = {
   label: string;
   value: number;
+  secondaryValue?: number;
 };
 
 type Props = {
@@ -22,7 +23,12 @@ export default function BarList({ items }: Props) {
           <div className="bar-row" key={item.label}>
             <div className="bar-meta">
               <span>{item.label}</span>
-              <strong>{item.value.toLocaleString('es-CR', { maximumFractionDigits: 2 })}</strong>
+              <strong>
+                {item.value.toLocaleString('es-CR', { style: 'currency', currency: 'CRC' })}
+                {item.secondaryValue !== undefined && (
+                  <small>{item.secondaryValue.toLocaleString('es-CR', { style: 'currency', currency: 'USD' })}</small>
+                )}
+              </strong>
             </div>
             <div className="bar-track">
               <div className="bar-fill" style={{ width: `${width}%` }} />
