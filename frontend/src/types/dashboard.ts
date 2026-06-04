@@ -40,5 +40,6 @@ export type Dashboard = {
   byMonth: MonthBreakdown[];
   byMerchant: Array<{ merchant: string; amountCrc: number; amountUsd: number; count: number }>;
   paymentMethods: Array<{ method: string; amountCrc: number; amountUsd: number; count: number }>;
+  byCurrency: Array<{ currency: string; amountOriginal: number; amountCrc: number; amountUsd: number; count: number }>;
   recentExpenses: Expense[];
 };

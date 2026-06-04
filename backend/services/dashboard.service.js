@@ -71,6 +71,28 @@ function groupExpenses(expenses, getKey) {
     .sort(sortByCrcDesc);
 }
 
+function groupOriginalCurrency(expenses) {
+  const groups = new Map();
+
+  for (const expense of expenses) {
+    const key = expense.currency || 'CRC';
+    if (!groups.has(key)) {
+      groups.set(key, { amountOriginal: 0, ...blankTotals() });
+    }
+    const totals = groups.get(key);
+    totals.amountOriginal += expense.amount || 0;
+    addExpense(totals, expense);
+  }
+
+  return Array.from(groups.entries())
+    .map(([currency, totals]) => ({
+      currency,
+      amountOriginal: currencyService.round2(totals.amountOriginal),
+      ...toTotalsObject(totals),
+    }))
+    .sort(sortByCrcDesc);
+}
+
 async function byCategory(filters) {
   const { expenses } = await getConvertedExpenses(filters);
   return groupExpenses(expenses, expense => expense.categoryName || '(sin categoría)')
@@ -114,6 +136,7 @@ async function dashboard(filters) {
     .map(({ key, ...groupTotals }) => ({ merchant: key, ...groupTotals }));
   const paymentMethodsData = groupExpenses(expenses, expense => expense.paymentMethod || '(sin método)')
     .map(({ key, ...groupTotals }) => ({ method: key, ...groupTotals }));
+  const byCurrencyData = groupOriginalCurrency(expenses);
 
   return {
     summary: {
@@ -135,6 +158,7 @@ async function dashboard(filters) {
     byMonth: byMonthData,
     byMerchant: byMerchantData,
     paymentMethods: paymentMethodsData,
+    byCurrency: byCurrencyData,
     recentExpenses: expenses,
   };
 }
