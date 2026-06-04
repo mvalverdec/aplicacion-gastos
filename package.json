@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "backend:dev": "node backend/server.js",
+    "frontend:dev": "vite --host 127.0.0.1 --config frontend/vite.config.ts",
+    "frontend:build": "vite build --config frontend/vite.config.ts",
+    "db:migrate": "node backend/db/migrate.js",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +16,19 @@
   "type": "commonjs",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "dotenv": "^17.4.2"
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "pg": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
   }
 }
